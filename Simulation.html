@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title></title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p>Using the exponential function, let&#39;s examine the distribution of averages of multiple sets of 40 exponentials. The mean of an exponential function is 1/lambda and the standard deviation is also 1/lambda. For these simulations, lambda will be 0.2.</p>
+
+<pre><code class="r">library(ggplot2) #load ggplot2 package
+set.seed(314) #set seed for reproducible results
+</code></pre>
+
+<p>Let&#39;s run 1000 simulations averaging 40 sample expontential samples.</p>
+
+<pre><code class="r">nosim &lt;- 1000
+n &lt;- 40
+lambda &lt;- 0.2
+</code></pre>
+
+<p>Set the mean of the 40 exponential samples as a function to be used to create a data frame of 1000 simulation values.</p>
+
+<pre><code class="r">test &lt;- function(n=n,lambda=lambda) mean(rexp(n, lambda))
+dat &lt;- data.frame(x = c(apply(matrix(n,nosim), 1, test,lambda)))
+</code></pre>
+
+<p>Plotting a histogram of the results shows the distribution of average simulation values.  </p>
+
+<pre><code class="r">g &lt;- ggplot(dat) + geom_histogram(aes(x=x,y=..density..), colour = &quot;black&quot;, fill = &quot;blue&quot;) 
+g &lt;- g + labs(title = &quot;Histogram of 1000 means of 40 exponential samples&quot;)
+g &lt;- g + labs(x = &quot;Mean of 40 Samples of Exponential Distribution&quot;) + labs(y = &quot;Density&quot;)
+g &lt;- g + stat_function(fun = dnorm, size = 3, args = list(mean = 1/lambda, sd = 1/sqrt(n)/lambda))
+g &lt;- g + geom_vline(xintercept = 1/lambda, colour = &quot;black&quot;, size = 3)
+g &lt;- g + geom_vline(xintercept = mean(dat$x), colour = &quot;red&quot;, linetype = &quot;longdash&quot;, size = 2)
+g &lt;- g + annotate(&quot;text&quot;, x = 6.4, y = 0.55, label = &quot;Expected Mean = 1/lambda = 5&quot;)
+g
+</code></pre>
+
+<pre><code>## stat_bin: binwidth defaulted to range/30. Use &#39;binwidth = x&#39; to adjust this.
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" style="display: block; margin: auto;" /></p>
+
+<p><strong>1. Show where the distribution is centered at and compare it to the theoretical center of the distribution.</strong></p>
+
+<p>The distribution mean (red dashed line) is centered near the theoretical mean (black line) near 5. The expected mean is 1/0.2 = 5. The calculated mean is 5.0233404.</p>
+
+<p><strong>2. Show how variable it is and compare it to the theoretical variance of the distribution.</strong></p>
+
+<p>The expected variance is calculated using 1/(n*lambda<sup>2).</sup> The calculated variance is close and would be closer with more simulations.</p>
+
+<pre><code class="r">exp_var &lt;- round(1/(n*lambda^2),3)
+calc_var &lt;- round((sd(dat$x))^2,3)
+print(c(&quot;Expected Variance =&quot;, exp_var))
+</code></pre>
+
+<pre><code>## [1] &quot;Expected Variance =&quot; &quot;0.625&quot;
+</code></pre>
+
+<pre><code class="r">print(c(&quot;Calculated Variance =&quot;, calc_var))
+</code></pre>
+
+<pre><code>## [1] &quot;Calculated Variance =&quot; &quot;0.651&quot;
+</code></pre>
+
+<p><strong>3. Show that the distribution is approximately normal.</strong></p>
+
+<p>Plotted with the histogram is is a normal distribution with a mean of 1/0.2 =5 and a standard deviation of (1/sqrt(n)*lambda) = 1/(sqrt(40)*0.2) = 0.791, which matches the histogram well.</p>
+
+</body>
+
+</html>
